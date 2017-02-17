@@ -1,0 +1,47 @@
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+target/
+
+# Logs and databases #
+######################
+*.log
+*.sqlite
+
+# Java files #
+######################
+*.jar
+*.class
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+##########################
+*.iml
+.idea/
+.svn/
+indexer.log
+gc.log
+query.log
+bizer.log
+
+*target
+*.classpath
+*.project
+*.settings
+*deploy
+*deploy.zip
+*0
+*iml
+*gen-*
+*logs
+data/
