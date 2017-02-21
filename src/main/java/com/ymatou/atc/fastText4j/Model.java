@@ -39,7 +39,7 @@ public class Model {
 
     public Model(Matrix input, Matrix output, Args args, int seed) {
         this.hidden = new Vector(args.getDim());
-        this.output = new Vector(wo.m);
+        this.output = new Vector(output.m);
         this.grad = new Vector(args.getDim());
         this.rng = new Random(seed);
 
@@ -173,6 +173,10 @@ public class Model {
         }
         Heap.heapSort(heap);
         return heap;
+    }
+
+    public ArrayList<Prediction> predict(ArrayList<Integer> input, int k) {
+        return predict(input, k, this.hidden, this.output);
     }
 
 

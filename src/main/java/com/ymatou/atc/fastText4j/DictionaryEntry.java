@@ -10,7 +10,7 @@ public class DictionaryEntry {
     public String word;
     public long count;
     public int type;
-    public List<Integer> subwords;
+    public ArrayList<Integer> subwords;
 
     public DictionaryEntry() {
         word = "";

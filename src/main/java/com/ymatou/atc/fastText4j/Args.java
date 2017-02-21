@@ -1,8 +1,6 @@
 package com.ymatou.atc.fastText4j;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * Created by fujie on 2017/2/16.
@@ -49,29 +47,22 @@ public class Args {
         verbose = 2;
         pretrainedVectors = "";
     }
-    public void load(InputStream in) throws IOException {
 
-        DataInputStream dataInputStream = new DataInputStream(in);
-        dim = dataInputStream.readInt();
-//        byte[] bytes = new byte[4];
-//        in.read(bytes, 0, 4);
-//        int dim =  bytes[0] & 0xFF |
-//                (bytes[1] & 0xFF) << 8 |
-//                (bytes[2] & 0xFF) << 16 |
-//                (bytes[3] & 0xFF) << 24;
-        //        dim = dataInputStream.readInt();
-//        ws = dataInputStream.readInt();
-//        epoch = dataInputStream.readInt();
-//        minCount = dataInputStream.readInt();
-//        neg = dataInputStream.readInt();
-//        wordNgrams = dataInputStream.readInt();
-//        loss = dataInputStream.readInt();
-//        model = dataInputStream.readInt();
-//        bucket = dataInputStream.readInt();
-//        minn = dataInputStream.readInt();
-//        maxn = dataInputStream.readInt();
-//        lrUpdateRate = dataInputStream.readInt();
-//        t = dataInputStream.readDouble();
+    public void load(BufferedReader in) throws IOException {
+        String[] line = in.readLine().split(" ");
+        dim = Integer.parseInt(line[0]);
+        ws = Integer.parseInt(line[1]);
+        epoch = Integer.parseInt(line[2]);
+        minCount = Integer.parseInt(line[3]);
+        neg = Integer.parseInt(line[4]);
+        wordNgrams = Integer.parseInt(line[5]);
+        loss = Integer.parseInt(line[6]) - 1;
+        model = Integer.parseInt(line[7]) - 1;
+        bucket = Integer.parseInt(line[8]);
+        minn = Integer.parseInt(line[9]);
+        maxn = Integer.parseInt(line[10]);
+        lrUpdateRate = Integer.parseInt(line[11]);
+        t = Double.parseDouble(line[12]);
     }
 
     public double getR() {

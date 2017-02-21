@@ -1,5 +1,6 @@
 package com.ymatou.atc.fastText4j;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,14 +15,16 @@ public class Matrix {
     public int n;
 
 
-    public void load(InputStream in) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(in);
-        m = (int)dataInputStream.readLong();
-        n = (int)dataInputStream.readLong();
+    public void load(BufferedReader in) throws IOException {
+        String[] line = in.readLine().split(" ");
+        m = Integer.parseInt(line[0]);
+        n = Integer.parseInt(line[1]);
         data = new float[m*n];
         for (int i =0 ; i<m ; i++) {
+            line = in.readLine().split(" ");
+            assert line.length == n;
             for (int j=0 ; j<n ;j++) {
-                data[i*m+j] = dataInputStream.readFloat();
+                data[i*n+j] = Float.parseFloat(line[j]);
             }
         }
     }

@@ -20,7 +20,7 @@ public class Dictionary {
     private Args args;
     private int[] word2int;
     private ArrayList<DictionaryEntry> words;
-    private ArrayList<Float> pdiscard;
+    private float[] pdiscard;
     private int size;
     private int nwords;
     private int nlabels;
@@ -45,51 +45,56 @@ public class Dictionary {
     public long hash(final String str) {
         long h = 2166136261L;
         for (int i = 0; i < str.length(); i++) {
-            h = h ^ (int)str.charAt(i);
-            h = h * 16777619;
+            h ^= (long)str.charAt(i);
+            h *= 16777619L;
+            h &= 0xffffffffL;
         }
         return h;
     }
 
     public int find(final String w) {
-        int h = (int) (hash(w) % MAX_VOCAB_SIZE);
-        while (word2int[h] != -1 && words.get(word2int[h]).word != w) {
+        int h = (int) (hash(w) % (long)MAX_VOCAB_SIZE);
+        while (word2int[h] != -1 && !words.get(word2int[h]).word.equalsIgnoreCase(w)) {
             h = (h + 1) % MAX_VOCAB_SIZE;
         }
         return h;
     }
 
-    public void load(InputStream in) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(in);
+    public void load(BufferedReader in) throws IOException {
+        String[] line = in.readLine().split(" ");
         words.clear();
         for (int i = 0; i < MAX_VOCAB_SIZE; i++) {
             word2int[i] = -1;
         }
-        size = dataInputStream.readInt();
-        nwords = dataInputStream.readInt();
-        nlabels = dataInputStream.readInt();
-        ntokens = dataInputStream.readLong();
-
-        for (int i = 0; i < size; i++) {
-            char c;
-            DictionaryEntry e = new DictionaryEntry();
-            while ((c = (char)dataInputStream.readByte()) != 0) {
-                e.word+=c;
+        size = Integer.parseInt(line[0]);
+        nwords = Integer.parseInt(line[1]);
+        nlabels = Integer.parseInt(line[2]);
+        ntokens = Integer.parseInt(line[3]);
+        String str;
+        int acc = 0;
+        try {
+            while (acc < size && (str = in.readLine()) != null) {
+                line = str.split(" ");
+                DictionaryEntry e = new DictionaryEntry();
+                e.word = line[0];
+                e.count = Integer.parseInt(line[1]);
+                e.type = Integer.parseInt(line[2]);
+                words.add(e);
+                word2int[find(e.word)] = acc++;
             }
-            e.count = dataInputStream.readLong();
-            e.type = dataInputStream.readByte() & 0xFF;
-            words.add(e);
-            word2int[find(e.word)] = i;
+        }
+        catch (Exception error) {
+            error.printStackTrace();
         }
         initTableDiscard();
         initNgrams();
     }
 
     private void initTableDiscard() {
-        pdiscard = new ArrayList<Float>(size);
+        pdiscard = new float[size];
         for (int i = 0; i < size; i++) {
             float f = (float) words.get(i).count / ntokens;
-            pdiscard.set(i, (float)sqrt(args.getT() / f) + (float)args.getT() / f);
+            pdiscard[i] = (float)sqrt(args.getT() / f) + (float)args.getT() / f;
         }
     }
 
@@ -155,12 +160,8 @@ public class Dictionary {
         this.words = words;
     }
 
-    public List<Float> getPdiscard() {
+    public float[] getPdiscard() {
         return pdiscard;
-    }
-
-    public void setPdiscard(ArrayList<Float> pdiscard) {
-        this.pdiscard = pdiscard;
     }
 
     public int getSize() {
@@ -207,25 +208,50 @@ public class Dictionary {
         return EOW;
     }
 
-    public ArrayList<Integer> getLine(InputStream in , Random rng)
-            throws IOException {
+    public void getLine(String in, Random rng, ArrayList<Integer> words, ArrayList<Integer> labels) {
         String token;
         int ntokens = 0;
-        ArrayList<Integer> words = new ArrayList<Integer>();
-        ArrayList<Integer> labels = new ArrayList<Integer>();
-        while (!(token = readWord(in)).equalsIgnoreCase("")) {
-            int wid = getId(token);
+        words.clear();
+        labels.clear();
+        String[] line = (in+" "+EOS).split(" ");
+        for (int i = 0 ; i<line.length; i++) {
+            int wid = getId(line[i]);
             if (wid<0) continue;
             EntryType type = getType(wid);
             ntokens ++;
-            if (type==EntryType.word && !discard(wid, rng)) {
+            if (type==EntryType.word && !discard(wid, rng)
+                    ) {
                 words.add(wid);
             }
             if (type==EntryType.label) {
                 labels.add(wid - nwords);
             }
             if (words.size() > MAX_LINE_SIZE && args.getModel() != ModelName.sup) break;
-            if (token == EOS) break;
+            if (line[i].equalsIgnoreCase(EOS)) break;
+        }
+    }
+
+    public ArrayList<Integer> getLine(String in , Random rng)
+            throws IOException {
+        String token;
+        int ntokens = 0;
+        ArrayList<Integer> words = new ArrayList<Integer>();
+        ArrayList<Integer> labels = new ArrayList<Integer>();
+        String[] line = (in+" "+EOS).split(" ");
+        for (int i = 0 ; i<line.length; i++) {
+            int wid = getId(line[i]);
+            if (wid<0) continue;
+            EntryType type = getType(wid);
+            ntokens ++;
+            if (type==EntryType.word && !discard(wid, rng)
+                    ) {
+                words.add(wid);
+            }
+            if (type==EntryType.label) {
+                labels.add(wid - nwords);
+            }
+            if (words.size() > MAX_LINE_SIZE && args.getModel() != ModelName.sup) break;
+            if (line[i].equalsIgnoreCase(EOS)) break;
         }
         return words;
     }
@@ -234,7 +260,7 @@ public class Dictionary {
         assert(id >= 0);
         assert(id < nwords);
         if (args.getModel() == ModelName.sup) return false;
-        return rand.nextGaussian() > pdiscard.get(id);
+        return rand.nextGaussian() > pdiscard[id];
     }
 
     private EntryType getType(int wid) {
@@ -248,34 +274,13 @@ public class Dictionary {
         return word2int[h];
     }
 
-    private String readWord(InputStream in) throws IOException {
-        char c;
-        String word = "";
-        DataInputStream dataInputStream = new DataInputStream(in);
-        while ((c = dataInputStream.readChar()) != -1) {
-            if (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\f' || c == '\0') {
-                if (word.length()==0) {
-                    if (c == '\n') {
-                        word += EOS;
-                        return word;
-                    }
-                    continue;
-                } else {
-                    return word;
-                }
-            }
-            word+=c;
-        }
-        return word;
-    }
-
     public void addNgrams(ArrayList<Integer> line, int n) {
         int line_size = line.size();
         for (int i=0 ; i<line_size ; i++) {
-            int h = line.get(i);
+            long h = line.get(i);
             for (int j = i+1 ; j<line_size  && j<i+n ; j++) {
-                h = h*116049371 + line.get(j);
-                line.add(nwords + (h%args.getBucket()));
+                h = ((long)((h*116049371L)&0xffffffffL) + line.get(j))&0xffffffffL;
+                line.add(nwords + (int)(h%(long)args.getBucket()));
             }
         }
     }
@@ -284,5 +289,21 @@ public class Dictionary {
         assert (i>=0);
         assert (i<nlabels);
         return words.get(i + nwords).word;
+    }
+
+    public ArrayList<Integer> getNgrams(String word) {
+        int i = getId(word);
+        if (i>=0) {
+            return getNgrams(i);
+        }
+        ArrayList<Integer> ngrams = new ArrayList<Integer>();
+        computeNgrams(BOW+word+EOW, ngrams);
+        return ngrams;
+    }
+
+    private ArrayList<Integer> getNgrams(int i) {
+        assert (i>=0);
+        assert (i<nwords);
+        return words.get(i).subwords;
     }
 }

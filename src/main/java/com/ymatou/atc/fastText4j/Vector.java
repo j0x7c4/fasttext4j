@@ -73,10 +73,6 @@ public class Vector {
         return data[i];
     }
 
-    public void set(int i, float v) {
-        data[i] = v;
-    }
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0 ; i<m ; i++) {
@@ -87,5 +83,9 @@ public class Vector {
 
     public long getM() {
         return m;
+    }
+
+    public void set(int i, float v) {
+        data[i] = v;
     }
 }
