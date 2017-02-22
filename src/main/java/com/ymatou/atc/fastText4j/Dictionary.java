@@ -219,7 +219,8 @@ public class Dictionary {
             if (wid<0) continue;
             EntryType type = getType(wid);
             ntokens ++;
-            if (type==EntryType.word && !discard(wid, rng)
+            if (type==EntryType.word
+                    && !discard(wid, rng)
                     ) {
                 words.add(wid);
             }
