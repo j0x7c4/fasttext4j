@@ -18,29 +18,29 @@ opt: fasttext
 debug: CXXFLAGS += -g -O0 -fno-inline
 debug: fasttext
 
-args.o: src/args.cc src/args.h
-	$(CXX) $(CXXFLAGS) -c src/args.cc
+args.o: cpp/args.cc cpp/args.h
+	$(CXX) $(CXXFLAGS) -c cpp/args.cc
 
-dictionary.o: src/dictionary.cc src/dictionary.h src/args.h
-	$(CXX) $(CXXFLAGS) -c src/dictionary.cc
+dictionary.o: cpp/dictionary.cc cpp/dictionary.h cpp/args.h
+	$(CXX) $(CXXFLAGS) -c cpp/dictionary.cc
 
-matrix.o: src/matrix.cc src/matrix.h src/utils.h
-	$(CXX) $(CXXFLAGS) -c src/matrix.cc
+matrix.o: cpp/matrix.cc cpp/matrix.h cpp/utils.h
+	$(CXX) $(CXXFLAGS) -c cpp/matrix.cc
 
-vector.o: src/vector.cc src/vector.h src/utils.h
-	$(CXX) $(CXXFLAGS) -c src/vector.cc
+vector.o: cpp/vector.cc cpp/vector.h cpp/utils.h
+	$(CXX) $(CXXFLAGS) -c cpp/vector.cc
 
-model.o: src/model.cc src/model.h src/args.h
-	$(CXX) $(CXXFLAGS) -c src/model.cc
+model.o: cpp/model.cc cpp/model.h cpp/args.h
+	$(CXX) $(CXXFLAGS) -c cpp/model.cc
 
-utils.o: src/utils.cc src/utils.h
-	$(CXX) $(CXXFLAGS) -c src/utils.cc
+utils.o: cpp/utils.cc cpp/utils.h
+	$(CXX) $(CXXFLAGS) -c cpp/utils.cc
 
-fasttext.o: src/fasttext.cc src/*.h
-	$(CXX) $(CXXFLAGS) -c src/fasttext.cc
+fasttext.o: cpp/fasttext.cc cpp/*.h
+	$(CXX) $(CXXFLAGS) -c cpp/fasttext.cc
 
-fasttext: $(OBJS) src/fasttext.cc
-	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o fasttext
+fasttext: $(OBJS) cpp/fasttext.cc
+	$(CXX) $(CXXFLAGS) $(OBJS) cpp/main.cc -o fasttext
 
 clean:
 	rm -rf *.o fasttext

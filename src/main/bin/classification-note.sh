@@ -33,8 +33,15 @@ fi
 
 ./fasttext supervised -input "${DATADIR}/note.train" -output "${RESULTDIR}/note" -dim 15 -lr 0.001 -wordNgrams 5 -minCount 3 -bucket 10000000 -epoch 1000 -thread 4
 
-./fasttext test "${RESULTDIR}/note.bin" "${DATADIR}/note.test"
+MAIN_CLASS="com.ymatou.atc.fasttext4j.Application"
+CLASS_PATH="lib/*:conf"
+JAVA_OPTS="-Xms4096M -Xmx4096M -Xmn2048M  -Xss32M \
+    -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 \
+    -XX:+PrintGCDetails -XX:+PrintGCDateStamps -verbose:gc -XX:+DisableExplicitGC"
 
-./fasttext predict-prob "${RESULTDIR}/note.bin" "${DATADIR}/note.test" > "${RESULTDIR}/note.test.predict"
+
+java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} test "${RESULTDIR}/note.model" "${DATADIR}/note.test"
+
+java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} predict-prob "${RESULTDIR}/note.model" "${DATADIR}/note.test" > "${RESULTDIR}/note.test.predict"
 
 python diff.py -t "${DATADIR}/note.test" -p "${RESULTDIR}/note.test.predict" -o "${RESULTDIR}/note.test.predict.diff"
