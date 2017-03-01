@@ -37,6 +37,13 @@ make
 
 ./fasttext supervised -input "${DATADIR}/dbpedia.train" -output "${RESULTDIR}/dbpedia" -dim 10 -lr 0.1 -wordNgrams 2 -minCount 1 -bucket 10000000 -epoch 5 -thread 4
 
-./fasttext test "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test"
+MAIN_CLASS="com.ymatou.atc.fastText4j.Application"
+CLASS_PATH="lib/*:conf"
+JAVA_OPTS="-Xms4096M -Xmx4096M -Xmn2048M  -Xss32M \
+    -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly \
+    -XX:CMSInitiatingOccupancyFraction=75 -XX:+DisableExplicitGC"
 
-./fasttext predict "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test" > "${RESULTDIR}/dbpedia.test.predict"
+
+java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} test "${RESULTDIR}/dbpedia.model" "${DATADIR}/dbpedia.test"
+
+java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} predict "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test" > "${RESULTDIR}/dbpedia.test.predict"

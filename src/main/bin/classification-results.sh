@@ -67,12 +67,17 @@ done
 
 make
 
+MAIN_CLASS="com.ymatou.atc.fastText4j.Application"
+CLASS_PATH="lib/*:conf"
+JAVA_OPTS="-Xms4096M -Xmx4096M -Xmn2048M  -Xss32M \
+    -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly \
+    -XX:CMSInitiatingOccupancyFraction=75 -XX:+DisableExplicitGC"
+
 for i in {0..7}
 do
   echo "Working on dataset ${DATASET[i]}"
   ./fasttext supervised -input "${DATADIR}/${DATASET[i]}.train" \
     -output "${RESULTDIR}/${DATASET[i]}" -dim 10 -lr "${LR[i]}" -wordNgrams 2 \
     -minCount 1 -bucket 10000000 -epoch 5 -thread 4 > /dev/null
-  ./fasttext test "${RESULTDIR}/${DATASET[i]}.bin" \
-    "${DATADIR}/${DATASET[i]}.test"
+  java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} test "${RESULTDIR}/${DATASET[i]}.model" "${DATADIR}/${DATASET[i]}.test"
 done

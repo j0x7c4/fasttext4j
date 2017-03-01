@@ -33,8 +33,14 @@ make
   -ws 5 -epoch 1 -minCount 5 -neg 5 -loss ns -bucket 2000000 \
   -minn 3 -maxn 6 -thread 4 -t 1e-4 -lrUpdateRate 100
 
+MAIN_CLASS="com.ymatou.atc.fastText4j.Application"
+CLASS_PATH="lib/*:conf"
+JAVA_OPTS="-Xms4096M -Xmx4096M -Xmn2048M  -Xss32M \
+    -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly \
+    -XX:CMSInitiatingOccupancyFraction=75 -XX:+DisableExplicitGC"
+
 cut -f 1,2 "${DATADIR}"/rw/rw.txt | awk '{print tolower($0)}' | tr '\t' '\n' > "${DATADIR}"/queries.txt
 
-cat "${DATADIR}"/queries.txt | ./fasttext print-vectors "${RESULTDIR}"/text9.bin > "${RESULTDIR}"/vectors.txt
+cat "${DATADIR}"/queries.txt | java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} print-vectors "${RESULTDIR}"/text9.bin > "${RESULTDIR}"/vectors.txt
 
 python eval.py -m "${RESULTDIR}"/vectors.txt -d "${DATADIR}"/rw/rw.txt
