@@ -46,4 +46,4 @@ JAVA_OPTS="-Xms4096M -Xmx4096M -Xmn2048M  -Xss32M \
 
 java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} test "${RESULTDIR}/dbpedia.model" "${DATADIR}/dbpedia.test"
 
-java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} predict "${RESULTDIR}/dbpedia.bin" "${DATADIR}/dbpedia.test" > "${RESULTDIR}/dbpedia.test.predict"
+java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} predict "${RESULTDIR}/dbpedia.model" "${DATADIR}/dbpedia.test" > "${RESULTDIR}/dbpedia.test.predict"
