@@ -33,11 +33,11 @@ fi
 
 ./fasttext supervised -input "${DATADIR}/note.train" -output "${RESULTDIR}/note" -dim 15 -lr 0.001 -wordNgrams 5 -minCount 3 -bucket 10000000 -epoch 1000 -thread 4
 
-MAIN_CLASS="com.ymatou.atc.fasttext4j.Application"
+MAIN_CLASS="com.ymatou.atc.fastText4j.Application"
 CLASS_PATH="lib/*:conf"
 JAVA_OPTS="-Xms4096M -Xmx4096M -Xmn2048M  -Xss32M \
-    -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 \
-    -XX:+PrintGCDetails -XX:+PrintGCDateStamps -verbose:gc -XX:+DisableExplicitGC"
+    -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly \
+    -XX:CMSInitiatingOccupancyFraction=75 -XX:+DisableExplicitGC"
 
 
 java ${JAVA_OPTS} -cp ${CLASS_PATH} ${MAIN_CLASS} test "${RESULTDIR}/note.model" "${DATADIR}/note.test"
