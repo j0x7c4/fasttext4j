@@ -35,7 +35,7 @@ public class Matrix {
         assert (vec.getM() == n);
         float d = 0.0f;
         for (int j=0 ; j<n; j++) {
-            d += data[i*n+j]*vec.get(i);
+            d += data[i*n+j]*vec.get(j);
         }
         return d;
     }

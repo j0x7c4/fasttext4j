@@ -29,7 +29,7 @@ public class Model {
 
     private ArrayList<ArrayList<Integer>> paths;
     private ArrayList<ArrayList<Boolean>> codes;
-    private ArrayList<ModelNode> tree;
+    private ModelNode[] tree;
 
     private ArrayList<Integer> negatives;
     private int negpos;
@@ -102,41 +102,41 @@ public class Model {
     }
 
     private void buildTree(ArrayList<Long> counts) {
-        tree = new ArrayList<ModelNode>(2 * osz - 1);
+        tree = new ModelNode[2 * osz - 1];
         paths = new ArrayList<ArrayList<Integer>>();
         codes = new ArrayList<ArrayList<Boolean>>();
         for (int i=0 ; i<2 *osz - 1; i++) {
-            tree.set(i, new ModelNode());
+            tree[i] = new ModelNode();
         }
         for (int i=0 ; i<osz ; i++) {
-            tree.get(i).count = counts.get(i);
+            tree[i].count = counts.get(i);
         }
         int leaf = osz - 1;
         int node = osz;
         for ( int i = osz; i<2*osz-1 ; i++) {
             int[] mini = new int[2];
             for (int j =0 ; j<2 ; j++) {
-                if (leaf>=0 && tree.get(leaf).count < tree.get(node).count) {
+                if (leaf>=0 && tree[leaf].count < tree[node].count) {
                     mini[j] = leaf --;
                 } else {
                     mini[j] = node ++;
                 }
             }
-            tree.get(i).left = mini[0];
-            tree.get(i).right = mini[i];
-            tree.get(i).count = tree.get(mini[0]).count + tree.get(mini[1]).count;
-            tree.get(mini[0]).parent = i;
-            tree.get(mini[1]).parent = i;
-            tree.get(mini[1]).binary = true;
+            tree[i].left = mini[0];
+            tree[i].right = mini[1];
+            tree[i].count = tree[mini[0]].count + tree[mini[1]].count;
+            tree[mini[0]].parent = i;
+            tree[mini[1]].parent = i;
+            tree[mini[1]].binary = true;
         }
         for (int i=0 ; i<osz ; i++) {
             ArrayList<Integer> path = new ArrayList<Integer>();
             ArrayList<Boolean> code = new ArrayList<Boolean>();
             int j = i;
-            while (tree.get(j).parent != -1) {
-                path.add(tree.get(j).parent - osz);
-                code.add(tree.get(j).binary);
-                j = tree.get(j).parent;
+            while (tree[j].parent != -1) {
+                path.add(tree[j].parent - osz);
+                code.add(tree[j].binary);
+                j = tree[j].parent;
             }
             paths.add(path);
             codes.add(code);
@@ -194,7 +194,7 @@ public class Model {
             return;
         }
 
-        if (tree.get(node).left == -1 && tree.get(node).right == -1) {
+        if (tree[node].left == -1 && tree[node].right == -1) {
             heap.add(new Prediction(score, node));
             Heap.adjustHeap(heap, 0, heap.size());
             if (heap.size() > k) {
@@ -204,8 +204,8 @@ public class Model {
         }
 
         float f = sigmoid(wo.dotRow(hidden, node - osz));
-        dfs(k, tree.get(node).left, score + log(1.0f - f), heap, hidden);
-        dfs(k, tree.get(node).right, score + log(f), heap, hidden);
+        dfs(k, tree[node].left, score + log(1.0f - f), heap, hidden);
+        dfs(k, tree[node].right, score + log(f), heap, hidden);
     }
 
     void findKBest(int k, ArrayList<Prediction> heap,Vector hidden, Vector output) {
